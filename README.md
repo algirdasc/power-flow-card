@@ -1,7 +1,7 @@
 
 # Power Flow Card for Home Assistant
 
-[![Power Flow Card Demo](https://github.com/LordGuenni/power-flow-card/blob/master/src/assets/preview.webm?raw=true)
+![Power Flow Animation](preview.gif)
 A custom Lovelace card for visualizing real-time energy flow between grid, solar, battery, and home.  
 Provides a clean, animated interface that makes it easy to understand how power is moving through your system.
 
