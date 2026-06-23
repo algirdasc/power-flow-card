@@ -621,3 +621,11 @@ class PowerFlowCard extends LitElement {
 }
 
 customElements.define("power-flow-card", PowerFlowCard);
+
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: "power-flow-card",
+  name: "Power Flow Card",
+  preview: true,
+  description: "Power Flow visualisation card for Home Assistant Lovelace",
+});
