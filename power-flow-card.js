@@ -97,12 +97,11 @@ class PowerFlowCard extends LitElement {
     // align: "left" (default) draws the line then text to its right;
     // "right" draws the text to the left of the line, right-justified.
     this.descriptorAnchors = {
-      solar: { lineX: 523, lineY1: 12, lineY2: 137, textX: 537, valueY: 40, labelY: 82 },
-      grid: { lineX: 171, lineY1: 12, lineY2: 320, textX: 185, valueY: 40, labelY: 82 },
+      solar: { lineX: 523, lineY1: 12, lineY2: 137, textX: 237, valueY: 40, labelY: 82, align: "right" },
+      grid: { lineX: 171, lineY1: 12, lineY2: 320, textX: 785, valueY: 740, labelY: 782, align: "right" },
       battery: { lineX: 672, lineY1: 130, lineY2: 400, textX: 686, valueY: 158, labelY: 200 },
-      // EV sits under the car in the garage and is skewed to follow the wall.
-      // No connector line; text is placed by `transform` with local coords.
-      ev: { transform: "translate(150,590) skewY(-23)", textX: 0, valueY: 0, labelY: 42, hideLine: true },
+      // EV sits under the car in the garage. No connector line.
+      ev: { textX: 330, valueY: 600, labelY: 642, hideLine: true },
       home: { lineX: 988, lineY1: 12, lineY2: 255, textX: 974, valueY: 40, labelY: 82, align: "right" },
     };
   }
