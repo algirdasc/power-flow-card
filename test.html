@@ -203,6 +203,22 @@
             state: '7000',
             attributes: { unit_of_measurement: 'W' }
           }
+        },
+        // Minimal mock of HA's render_template websocket API. Resolves any
+        // {{ states('entity') }} calls against mockHass.states so descriptor
+        // templates render during local testing.
+        connection: {
+          subscribeMessage(callback, msg) {
+            const render = () => {
+              const result = (msg.template || '').replace(
+                /\{\{\s*states\(\s*['"]([^'"]+)['"]\s*\)\s*\}\}/g,
+                (_, id) => (mockHass.states[id] ? mockHass.states[id].state : 'unknown')
+              );
+              callback({ result });
+            };
+            render();
+            return Promise.resolve(() => {});
+          }
         }
       };
 
@@ -231,19 +247,19 @@
         },
         solar_descriptor_enabled: true,
         solar_descriptor_label: 'Solar',
-        solar_descriptor_entity: 'sensor.solar_power',
+        solar_descriptor_template: "{{ states('sensor.solar_power') }} W",
         grid_descriptor_enabled: true,
         grid_descriptor_label: 'Grid',
-        grid_descriptor_entity: 'sensor.grid_import_power',
+        grid_descriptor_template: "{{ states('sensor.grid_import_power') }} W",
         battery_descriptor_enabled: true,
         battery_descriptor_label: 'Battery',
-        battery_descriptor_entity: 'sensor.battery_charge_power',
+        battery_descriptor_template: "{{ states('sensor.battery_charge_power') }} W",
         ev_descriptor_enabled: true,
         ev_descriptor_label: 'EV',
-        ev_descriptor_entity: 'sensor.ev_charge_power',
+        ev_descriptor_template: "{{ states('sensor.ev_charge_power') }} W",
         home_descriptor_enabled: true,
         home_descriptor_label: 'Home',
-        home_descriptor_entity: 'sensor.grid_export_power'
+        home_descriptor_template: "{{ states('sensor.grid_export_power') }} W"
       };
 
       // Initialize card

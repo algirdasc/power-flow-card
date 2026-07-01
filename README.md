@@ -103,33 +103,37 @@ ev_line_color: "#26c6da"
 
 ### Descriptors (Optional Labels)
 
-Add labels and additional values below each component. **All descriptors are optional:**
+Add labels and additional values below each component. The displayed value is
+produced by a [Jinja2 template](https://www.home-assistant.io/docs/configuration/templating/)
+rendered by Home Assistant, so you can format it however you like (units,
+rounding, combining multiple entities, conditional text, …). **All descriptors
+are optional:**
 
 ```yaml
 # Solar Descriptor (optional)
 solar_descriptor_enabled: true                          # Optional: Show solar descriptor
 solar_descriptor_label: Solar                           # Optional: Label text
-solar_descriptor_entity: sensor.sn_3015027172_daily_yield  # Optional: Entity for value
+solar_descriptor_template: "{{ states('sensor.sn_3015027172_daily_yield') }} kWh"  # Optional: Jinja2 value
 
 # Grid Descriptor (optional)
 grid_descriptor_enabled: true
 grid_descriptor_label: Grid
-grid_descriptor_entity: sensor.daily_grid_import
+grid_descriptor_template: "{{ states('sensor.daily_grid_import') }} kWh"
 
 # Battery Descriptor (optional)
 battery_descriptor_enabled: true
 battery_descriptor_label: Battery
-battery_descriptor_entity: sensor.battery_state_of_charge
+battery_descriptor_template: "{{ states('sensor.battery_state_of_charge') }} %"
 
 # EV Descriptor (optional)
 ev_descriptor_enabled: true
 ev_descriptor_label: EV
-ev_descriptor_entity: sensor.ev_daily_charge
+ev_descriptor_template: "{{ states('sensor.ev_daily_charge') }} kWh"
 
 # Home Descriptor (optional)
 home_descriptor_enabled: true
 home_descriptor_label: Home
-home_descriptor_entity: sensor.daily_home_consumption
+home_descriptor_template: "{{ states('sensor.daily_home_consumption') }} kWh"
 ```
 
 **Tip:** Only enable descriptors for components you want to display extra information for!
@@ -168,23 +172,23 @@ ev_line_color: "#26c6da"
 # Descriptors
 solar_descriptor_enabled: true
 solar_descriptor_label: Solar
-solar_descriptor_entity: sensor.sn_3015027172_daily_yield
+solar_descriptor_template: "{{ states('sensor.sn_3015027172_daily_yield') }} kWh"
 
 grid_descriptor_enabled: true
 grid_descriptor_label: Grid
-grid_descriptor_entity: sensor.daily_grid_import
+grid_descriptor_template: "{{ states('sensor.daily_grid_import') }} kWh"
 
 battery_descriptor_enabled: true
 battery_descriptor_label: Battery
-battery_descriptor_entity: sensor.battery_soc
+battery_descriptor_template: "{{ states('sensor.battery_soc') }} %"
 
 ev_descriptor_enabled: true
 ev_descriptor_label: EV
-ev_descriptor_entity: sensor.ev_daily_charge
+ev_descriptor_template: "{{ states('sensor.ev_daily_charge') }} kWh"
 
 home_descriptor_enabled: true
 home_descriptor_label: Home
-home_descriptor_entity: sensor.daily_consumption
+home_descriptor_template: "{{ states('sensor.daily_consumption') }} kWh"
 ```
 
 ### UI Configuration
@@ -223,7 +227,7 @@ All settings can be configured through the Home Assistant UI:
 | `ev_line_color` | ❌ No | Theme/default | EV flow line color |
 | `*_descriptor_enabled` | ❌ No | `false` | Show descriptor for component |
 | `*_descriptor_label` | ❌ No | - | Descriptor label text |
-| `*_descriptor_entity` | ❌ No | - | Entity for descriptor value |
+| `*_descriptor_template` | ❌ No | - | Jinja2 template rendered for the descriptor value |
 
 ---
 
