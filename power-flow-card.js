@@ -87,10 +87,10 @@ class PowerFlowCard extends LitElement {
     // "right" draws the text to the left of the line, right-justified.
     this.descriptorAnchors = {
       solar: { lineX: 523, lineY1: 12, lineY2: 137, textX: 537, valueY: 40, labelY: 82 },
-      grid: { lineX: 171, lineY1: 12, lineY2: 500, textX: 185, valueY: 40, labelY: 82 },
-      battery: { lineX: 672, lineY1: 130, lineY2: 440, textX: 686, valueY: 158, labelY: 200 },
+      grid: { lineX: 171, lineY1: 12, lineY2: 320, textX: 185, valueY: 40, labelY: 82 },
+      battery: { lineX: 672, lineY1: 130, lineY2: 400, textX: 686, valueY: 158, labelY: 200 },
       ev: { lineX: 365, lineY1: 130, lineY2: 315, textX: 379, valueY: 158, labelY: 200 },
-      home: { lineX: 788, lineY1: 12, lineY2: 255, textX: 774, valueY: 40, labelY: 82, align: "right" },
+      home: { lineX: 988, lineY1: 12, lineY2: 255, textX: 974, valueY: 40, labelY: 82, align: "right" },
     };
   }
 
