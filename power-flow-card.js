@@ -46,7 +46,7 @@ class PowerFlowCard extends LitElement {
         id: "ev",
         type: "ev",
         entity_key: "ev_charge_power",
-        reverse: true, // pulse originates from the central inverter box, flows to the car
+        reverse: false,
         container: "ev",
       },
       {
@@ -340,17 +340,18 @@ class PowerFlowCard extends LitElement {
         const durationStr = `${animationDuration.toFixed(2)}s`;
 
         lines.forEach((line) => {
-          // Only write to the DOM when something actually changed. Re-applying
-          // the same classes / --animation-duration on every hass update
-          // restarts the running animation and causes a visible flicker.
-          const wasActive = line.classList.contains("flow-active");
-          const wasReverse = line.classList.contains("reverse-flow");
-
-          if (wasActive !== isActive) {
+          // Only write to the DOM when the class isn't already in the desired
+          // state. Re-applying the same classes / --animation-duration on every
+          // hass update restarts the running animation and causes flicker, but
+          // we must still set the correct class on first render (a fresh line
+          // has neither flow-active nor flow-off).
+          if (line.classList.contains("flow-active") !== isActive) {
             line.classList.toggle("flow-active", isActive);
+          }
+          if (line.classList.contains("flow-off") !== !isActive) {
             line.classList.toggle("flow-off", !isActive);
           }
-          if (wasReverse !== reverse) {
+          if (line.classList.contains("reverse-flow") !== reverse) {
             line.classList.toggle("reverse-flow", reverse);
           }
           if (isActive && line.dataset.animDuration !== durationStr) {
