@@ -46,7 +46,7 @@ class PowerFlowCard extends LitElement {
         id: "ev",
         type: "ev",
         entity_key: "ev_charge_power",
-        reverse: false,
+        reverse: true, // pulse originates from the central inverter box, flows to the car
         container: "ev",
       },
       {
@@ -335,13 +335,27 @@ class PowerFlowCard extends LitElement {
           animationDuration = minSpeed - (speedRatio * (minSpeed - maxSpeed));
         }
 
+        // Round the duration so tiny power fluctuations don't rewrite the
+        // custom property every tick (which restarts the animation = flicker).
+        const durationStr = `${animationDuration.toFixed(2)}s`;
+
         lines.forEach((line) => {
-          line.classList.toggle("flow-active", isActive);
-          line.classList.toggle("flow-off", !isActive);
-          line.classList.toggle("reverse-flow", reverse);
-          
-          if (isActive) {
-            line.style.setProperty('--animation-duration', `${animationDuration}s`);
+          // Only write to the DOM when something actually changed. Re-applying
+          // the same classes / --animation-duration on every hass update
+          // restarts the running animation and causes a visible flicker.
+          const wasActive = line.classList.contains("flow-active");
+          const wasReverse = line.classList.contains("reverse-flow");
+
+          if (wasActive !== isActive) {
+            line.classList.toggle("flow-active", isActive);
+            line.classList.toggle("flow-off", !isActive);
+          }
+          if (wasReverse !== reverse) {
+            line.classList.toggle("reverse-flow", reverse);
+          }
+          if (isActive && line.dataset.animDuration !== durationStr) {
+            line.style.setProperty("--animation-duration", durationStr);
+            line.dataset.animDuration = durationStr;
           }
         });
       });
@@ -409,6 +423,7 @@ class PowerFlowCard extends LitElement {
             { name: "solar_descriptor_enabled", selector: { boolean: {} } },
             { name: "solar_descriptor_label", selector: { text: {} } },
             { name: "solar_descriptor_template", selector: { template: {} } },
+            { name: "solar_descriptor_entity", selector: { entity: {} } },
           ],
         },
         {
@@ -419,6 +434,7 @@ class PowerFlowCard extends LitElement {
             { name: "grid_descriptor_enabled", selector: { boolean: {} } },
             { name: "grid_descriptor_label", selector: { text: {} } },
             { name: "grid_descriptor_template", selector: { template: {} } },
+            { name: "grid_descriptor_entity", selector: { entity: {} } },
           ],
         },
         {
@@ -429,6 +445,7 @@ class PowerFlowCard extends LitElement {
             { name: "battery_descriptor_enabled", selector: { boolean: {} } },
             { name: "battery_descriptor_label", selector: { text: {} } },
             { name: "battery_descriptor_template", selector: { template: {} } },
+            { name: "battery_descriptor_entity", selector: { entity: {} } },
           ],
         },
         {
@@ -439,6 +456,7 @@ class PowerFlowCard extends LitElement {
             { name: "ev_descriptor_enabled", selector: { boolean: {} } },
             { name: "ev_descriptor_label", selector: { text: {} } },
             { name: "ev_descriptor_template", selector: { template: {} } },
+            { name: "ev_descriptor_entity", selector: { entity: {} } },
           ],
         },
         {
@@ -449,6 +467,7 @@ class PowerFlowCard extends LitElement {
             { name: "home_descriptor_enabled", selector: { boolean: {} } },
             { name: "home_descriptor_label", selector: { text: {} } },
             { name: "home_descriptor_template", selector: { template: {} } },
+            { name: "home_descriptor_entity", selector: { entity: {} } },
           ],
         },
       ],
@@ -482,18 +501,23 @@ class PowerFlowCard extends LitElement {
           solar_descriptor_enabled: "Enable solar descriptor",
           solar_descriptor_label: "Label",
           solar_descriptor_template: "Value (Jinja2 template)",
+          solar_descriptor_entity: "Entity to open on click (optional)",
           grid_descriptor_enabled: "Enable grid descriptor",
           grid_descriptor_label: "Label",
           grid_descriptor_template: "Value (Jinja2 template)",
+          grid_descriptor_entity: "Entity to open on click (optional)",
           battery_descriptor_enabled: "Enable battery descriptor",
           battery_descriptor_label: "Label",
           battery_descriptor_template: "Value (Jinja2 template)",
+          battery_descriptor_entity: "Entity to open on click (optional)",
           ev_descriptor_enabled: "Enable EV descriptor",
           ev_descriptor_label: "Label",
           ev_descriptor_template: "Value (Jinja2 template)",
+          ev_descriptor_entity: "Entity to open on click (optional)",
           home_descriptor_enabled: "Enable home descriptor",
           home_descriptor_label: "Label",
           home_descriptor_template: "Value (Jinja2 template)",
+          home_descriptor_entity: "Entity to open on click (optional)",
         };
         return map[schema.name];
       },
@@ -579,6 +603,17 @@ class PowerFlowCard extends LitElement {
         fill: var(--secondary-text-color, #9aa0a6);
         font-size: 32px;
         font-weight: 500;
+      }
+
+      /* Clickable descriptors opt back into pointer events (the overlay
+         itself is pointer-events:none so non-clickable areas pass through). */
+      .descriptor.clickable {
+        cursor: pointer;
+        pointer-events: all;
+      }
+      .descriptor.clickable:hover .descriptor-value,
+      .descriptor.clickable:hover .descriptor-label {
+        fill: var(--primary-color, #03a9f4);
       }
 
       /* Animated Line Styles */
@@ -673,13 +708,32 @@ class PowerFlowCard extends LitElement {
     // Right-aligned descriptors sit the text to the left of the line.
     const textAnchor = anchor.align === "right" ? "end" : "start";
 
+    // Optional entity: when set, the descriptor opens that entity's more-info
+    // dialog on click.
+    const entityId = this.config[`${type}_descriptor_entity`];
+    const clickable = !!entityId;
+
     return svg`
-      <g class="descriptor descriptor-${type}">
+      <g
+        class="descriptor descriptor-${type} ${clickable ? "clickable" : ""}"
+        @click=${clickable ? () => this._openMoreInfo(entityId) : null}
+      >
         <line class="descriptor-line" x1="${anchor.lineX}" y1="${anchor.lineY1}" x2="${anchor.lineX}" y2="${anchor.lineY2}"></line>
         ${value ? svg`<text class="descriptor-value" text-anchor="${textAnchor}" x="${anchor.textX}" y="${anchor.valueY}">${value}</text>` : ""}
         ${label ? svg`<text class="descriptor-label" text-anchor="${textAnchor}" x="${anchor.textX}" y="${anchor.labelY}">${label}</text>` : ""}
       </g>
     `;
+  }
+
+  // Fire HA's hass-more-info event to open the entity dialog.
+  _openMoreInfo(entityId) {
+    if (!entityId) return;
+    const event = new CustomEvent("hass-more-info", {
+      detail: { entityId },
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(event);
   }
 
   // 7. HTML Template (The card structure)

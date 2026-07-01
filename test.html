@@ -248,6 +248,7 @@
         solar_descriptor_enabled: true,
         solar_descriptor_label: 'Solar',
         solar_descriptor_template: "{{ states('sensor.solar_power') }} W",
+        solar_descriptor_entity: 'sensor.solar_power',
         grid_descriptor_enabled: true,
         grid_descriptor_label: 'Grid',
         grid_descriptor_template: "{{ states('sensor.grid_import_power') }} W",
@@ -266,6 +267,12 @@
       const card = document.getElementById('card');
       card.setConfig(config);
       card.hass = mockHass;
+
+      // In real HA this event opens the more-info dialog; here we just log it.
+      card.addEventListener('hass-more-info', (e) => {
+        console.log('hass-more-info for:', e.detail.entityId);
+        alert('Would open more-info for: ' + e.detail.entityId);
+      });
 
       // Make functions globally available
       window.updateValues = function() {

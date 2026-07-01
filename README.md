@@ -114,6 +114,7 @@ are optional:**
 solar_descriptor_enabled: true                          # Optional: Show solar descriptor
 solar_descriptor_label: Solar                           # Optional: Label text
 solar_descriptor_template: "{{ states('sensor.sn_3015027172_daily_yield') }} kWh"  # Optional: Jinja2 value
+solar_descriptor_entity: sensor.sn_3015027172_daily_yield  # Optional: opens this entity's more-info dialog on click
 
 # Grid Descriptor (optional)
 grid_descriptor_enabled: true
@@ -137,6 +138,8 @@ home_descriptor_template: "{{ states('sensor.daily_home_consumption') }} kWh"
 ```
 
 **Tip:** Only enable descriptors for components you want to display extra information for!
+
+**Clickable descriptors:** Set `*_descriptor_entity` on any descriptor to make it clickable — clicking the value/label opens that entity's more-info dialog (the same popup HA's built-in cards use). Leave it unset to keep the descriptor non-interactive.
 
 ### Complete Example
 
@@ -228,6 +231,7 @@ All settings can be configured through the Home Assistant UI:
 | `*_descriptor_enabled` | ❌ No | `false` | Show descriptor for component |
 | `*_descriptor_label` | ❌ No | - | Descriptor label text |
 | `*_descriptor_template` | ❌ No | - | Jinja2 template rendered for the descriptor value |
+| `*_descriptor_entity` | ❌ No | - | Entity opened in the more-info dialog when the descriptor is clicked |
 
 ---
 
