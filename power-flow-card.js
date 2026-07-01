@@ -100,7 +100,9 @@ class PowerFlowCard extends LitElement {
       solar: { lineX: 523, lineY1: 12, lineY2: 137, textX: 537, valueY: 40, labelY: 82 },
       grid: { lineX: 171, lineY1: 12, lineY2: 320, textX: 185, valueY: 40, labelY: 82 },
       battery: { lineX: 672, lineY1: 130, lineY2: 400, textX: 686, valueY: 158, labelY: 200 },
-      ev: { lineX: 365, lineY1: 130, lineY2: 315, textX: 379, valueY: 158, labelY: 200 },
+      // EV sits under the car in the garage and is skewed to follow the wall.
+      // No connector line; text is placed by `transform` with local coords.
+      ev: { transform: "translate(150,590) skewY(-23)", textX: 0, valueY: 0, labelY: 42, hideLine: true },
       home: { lineX: 988, lineY1: 12, lineY2: 255, textX: 974, valueY: 40, labelY: 82, align: "right" },
     };
   }
@@ -775,9 +777,10 @@ class PowerFlowCard extends LitElement {
     return svg`
       <g
         class="descriptor descriptor-${type} ${clickable ? "clickable" : ""}"
+        transform=${anchor.transform || null}
         @click=${clickable ? () => this._openMoreInfo(entityId) : null}
       >
-        <line class="descriptor-line" x1="${anchor.lineX}" y1="${anchor.lineY1}" x2="${anchor.lineX}" y2="${anchor.lineY2}"></line>
+        ${anchor.hideLine ? "" : svg`<line class="descriptor-line" x1="${anchor.lineX}" y1="${anchor.lineY1}" x2="${anchor.lineX}" y2="${anchor.lineY2}"></line>`}
         ${value ? svg`<text class="descriptor-value" text-anchor="${textAnchor}" x="${anchor.textX}" y="${anchor.valueY}">${value}</text>` : ""}
         ${label ? svg`<text class="descriptor-label" text-anchor="${textAnchor}" x="${anchor.textX}" y="${anchor.labelY}">${label}</text>` : ""}
       </g>
