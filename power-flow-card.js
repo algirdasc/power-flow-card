@@ -224,11 +224,19 @@ class PowerFlowCard extends LitElement {
     }
   }
 
+  // Respect the container's inner padding: scale every SVG layer to the
+  // padded box and center it, so artwork and descriptors stay aligned.
+  _fitSvgToPadding(svgEl) {
+    svgEl.style.width = "calc(100% - 2 * var(--pfc-inner-padding, 0px))";
+    svgEl.style.height = "calc(100% - 2 * var(--pfc-inner-padding, 0px))";
+  }
+
   processSVGString(text, containerEl, lineType) {
     containerEl.innerHTML = text;
     const svgEl = containerEl.querySelector("svg");
     if (!svgEl) return;
 
+    this._fitSvgToPadding(svgEl);
     this.ensureGlow(svgEl);
 
     svgEl
@@ -270,6 +278,8 @@ class PowerFlowCard extends LitElement {
 
       if (isBackground) {
         containerEl.innerHTML = text;
+        const svgEl = containerEl.querySelector("svg");
+        if (svgEl) this._fitSvgToPadding(svgEl);
       } else {
         this.processSVGString(text, containerEl, lineType);
       }
@@ -608,7 +618,6 @@ class PowerFlowCard extends LitElement {
         height: 350px;
         container-type: size;
         pointer-events: none;
-        padding: 16px;
         box-sizing: border-box;
       }
       #svg-overlay > div:not(.descriptor) {
@@ -627,8 +636,6 @@ class PowerFlowCard extends LitElement {
       #descriptor-overlay {
         position: absolute;
         inset: 0;
-        width: 100%;
-        height: 100%;
         pointer-events: none;
       }
 
@@ -803,7 +810,7 @@ class PowerFlowCard extends LitElement {
   render() {
     const colorStyle = this.getColorStyleVars();
     return html`
-      <ha-card header="${this.config.name || "Power Flow Diagram"}" style="${colorStyle}">
+      <ha-card header="${this.config.name || "Power Flow Diagram"}" style="${colorStyle}; --pfc-inner-padding: 16px;">
         <div id="svg-overlay">
           <div id="svg-container-bg"></div>
           <div id="svg-container-solar"></div>
@@ -812,7 +819,8 @@ class PowerFlowCard extends LitElement {
           <div id="svg-container-primary"></div>
           <div id="svg-container-out"></div>
           <div id="svg-container-fg"></div>
-          <svg id="descriptor-overlay" viewBox="0 0 1139 756" preserveAspectRatio="xMidYMid meet">
+          <svg id="descriptor-overlay" viewBox="0 0 1139 756" preserveAspectRatio="xMidYMid meet"
+               style="width: calc(100% - 2 * var(--pfc-inner-padding, 0px)); height: calc(100% - 2 * var(--pfc-inner-padding, 0px)); margin: auto;">
             ${this.renderDescriptor("solar")}
             ${this.renderDescriptor("grid")}
             ${this.renderDescriptor("battery")}
