@@ -99,7 +99,7 @@ class PowerFlowCard extends LitElement {
     this.descriptorAnchors = {
       solar: { textX: 380, valueY: 40, labelY: 82, align: "right", hideLine: true },
       grid: { textX: 1050, valueY: 720, labelY: 762, align: "right", hideLine: true },
-      battery: { lineX: 672, lineY1: 60, lineY2: 400, textX: 626, valueY: 0, labelY: 42 },
+      battery: { lineX: 672, lineY1: 100, lineY2: 400, textX: 626, valueY: 40, labelY: 82 },
       // EV sits under the car in the garage. No connector line.
       ev: { textX: 330, valueY: 600, labelY: 642, hideLine: true },
       home: { textX: 1050, valueY: 40, labelY: 82, align: "right", hideLine: true },
@@ -640,13 +640,15 @@ class PowerFlowCard extends LitElement {
 
       .descriptor-value {
         fill: var(--primary-text-color, #ffffff);
-        font-size: 40px;
+        font-family: var(--ha-font-family-body, var(--mdc-typography-font-family, Roboto, sans-serif));
+        font-size: 32px;
         font-weight: bold;
       }
 
       .descriptor-label {
         fill: var(--secondary-text-color, #9aa0a6);
-        font-size: 32px;
+        font-family: var(--ha-font-family-body, var(--mdc-typography-font-family, Roboto, sans-serif));
+        font-size: 26px;
         font-weight: 500;
       }
 
